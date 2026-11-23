@@ -29,6 +29,7 @@ public class InventoryController : ControllerBase
 
     /// <summary>Returns every inventory item, from memory for 30 seconds after the first read.</summary>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<InventoryItemResponse>>> GetAll()
     {
         var watch = Stopwatch.StartNew();

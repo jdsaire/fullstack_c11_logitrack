@@ -26,6 +26,7 @@ public class OrderController : ControllerBase
 
     /// <summary>Returns every order with its item count.</summary>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<OrderSummaryResponse>>> GetAll()
     {
         // The count is computed in SQL; the items themselves are never loaded for the list.
