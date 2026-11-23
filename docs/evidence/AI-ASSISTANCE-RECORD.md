@@ -210,3 +210,44 @@ where the course page and a clean build disagreed are logged at the end of each 
 - Timings are taken with a Stopwatch around in-process requests (no network) by an opt-in timing test, so the same
   measurement runs before and after the changes. The inventory GET also logs, with a Stopwatch, whether each response
   came from memory or the database.
+
+## Part 5 · State and final review
+
+### Entry AI-15 · Part 5
+- **Date**: 2026-11-23
+- **Prompt (verbatim)**: Review this codebase for redundant logic.
+- **Suggested**: Merge the inventory list's inline projection with `InventoryItemResponse.From` into one mapping; drop the
+  `bool` that `Order.RemoveItem` returns, since no route reads it; remove the order route's manual "no items" check now
+  that a validation rule covers it.
+- **Verdict**: Kept in part.
+- **Why**: The manual "no items" check was already removed when validation rules arrived in Part 3. Kept the inline
+  projection: the database needs an expression it can turn into SQL, and the shared method runs only in memory, so
+  merging them would bring back loading whole rows. Kept `RemoveItem`'s result: Part 1's tests use it to show whether
+  an item was in the order.
+- **Result**: no further change.
+
+### Entry AI-16 · Part 5
+- **Date**: 2026-11-23
+- **Prompt (verbatim)**: Suggest final performance improvements.
+- **Suggested**: Response compression; caching order-by-id results too; a longer cache lifetime for the inventory list.
+- **Verdict**: Rejected.
+- **Why**: Payloads are a few kilobytes on localhost, so compression has nothing to save. Order by id measured 0.5 ms
+  without a cache, and caching it would add another set of entries to clear on every write. The 30-second lifetime is
+  what the course asks for.
+- **Result**: no change.
+
+### Entry AI-17 · Part 5
+- **Date**: 2026-11-23
+- **Prompt (verbatim)**: What else should I include in a production-ready API?
+- **Suggested**: Health checks, rate limiting, structured logging, API versioning, HTTPS with HSTS, a CORS policy,
+  documented error responses, a container image and a CI pipeline.
+- **Verdict**: Kept in part.
+- **Why**: Kept documented responses: Swagger now lists the 401 and 403 answers on protected routes and the 200 answer
+  on both lists, which it had marked "undocumented" during the Part 5 walkthrough. The rest belongs to deploying and
+  running a service, which this capstone doesn't do; each item is named as out of scope in the README.
+- **Result**: `ProducesResponseType` attributes on both controllers.
+
+### Course page vs clean build · Part 5
+- State persistence uses the database strategy: SQLite is the source of truth, and each order stores the id of the user
+  who created it (the page's "user tokens on the order" guidance). `RESTART-LOG.md` records a manual restart; a test
+  repeats it on every run.
