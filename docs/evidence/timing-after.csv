@@ -1,0 +1,10 @@
+route,mode,requests,median_ms,p95_ms,dataset,configuration,dotnet,machine,date
+/api/inventory,repeat,200,0.935,1.526,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/inventory,forced-miss,50,3.942,6.445,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/orders/{id},repeat,200,0.453,0.510,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/inventory,repeat,200,0.921,1.382,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/inventory,forced-miss,50,4.026,5.605,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/orders/{id},repeat,200,0.448,0.513,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/inventory,repeat,200,0.911,1.421,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/inventory,forced-miss,50,4.129,5.852,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23
+/api/orders/{id},repeat,200,0.445,0.517,2000 items; 200 orders x 5 items,Release,10.0.5,Apple M2 16 GB macOS 26.6.2,2026-11-23

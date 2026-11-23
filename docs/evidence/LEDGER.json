@@ -1,0 +1,102 @@
+{
+  "system": "LogiTrack order management API",
+  "author": "jdsaire",
+  "created_at": "2026-11-23",
+  "version": "1.0.0",
+  "badges_policy": {
+    "MEASURED": "Run on the named machine with method, environment, date and raw output recorded. Shown as [M].",
+    "SIMULATED": "Estimate or model. Shown as [SIM]; none in this ledger.",
+    "GAP": "Not measured, or not applicable."
+  },
+  "dataset": "2,000 inventory items; 200 orders x 5 items (SQLite file)",
+  "entries": [
+    {
+      "metric_id": "M-INV-01",
+      "name": "Inventory list, repeat requests",
+      "unit": "milliseconds (median of 200 requests; 50 for forced misses)",
+      "baseline": {
+        "value": 9.827,
+        "runs": [
+          9.827,
+          13.021,
+          9.292
+        ],
+        "badge": "MEASURED",
+        "method": "Stopwatch, TimingFixture, commit e7b71cc",
+        "environment": "Apple M2 16 GB, macOS 26.6.2, .NET 10.0.5, Release, in-process test host",
+        "date": "2026-11-23",
+        "raw_output_ref": "docs/evidence/timing-before.csv"
+      },
+      "result": {
+        "value": 0.921,
+        "runs": [
+          0.935,
+          0.921,
+          0.911
+        ],
+        "badge": "MEASURED",
+        "method": "Stopwatch, TimingFixture, commit 0008d37",
+        "environment": "Apple M2 16 GB, macOS 26.6.2, .NET 10.0.5, Release, in-process test host",
+        "date": "2026-11-23",
+        "raw_output_ref": "docs/evidence/timing-after.csv"
+      },
+      "note": "After: served from the 30 s memory cache."
+    },
+    {
+      "metric_id": "M-INV-02",
+      "name": "Inventory list, cache cleared before each request",
+      "unit": "milliseconds (median of 200 requests; 50 for forced misses)",
+      "baseline": {
+        "value": null,
+        "badge": "GAP",
+        "note": "route not cached before the change"
+      },
+      "result": {
+        "value": 4.026,
+        "runs": [
+          3.942,
+          4.026,
+          4.129
+        ],
+        "badge": "MEASURED",
+        "method": "Stopwatch, TimingFixture, commit 0008d37",
+        "environment": "Apple M2 16 GB, macOS 26.6.2, .NET 10.0.5, Release, in-process test host",
+        "date": "2026-11-23",
+        "raw_output_ref": "docs/evidence/timing-after.csv"
+      },
+      "note": "Compare with M-INV-01 baseline: untracked, projected query."
+    },
+    {
+      "metric_id": "M-ORD-01",
+      "name": "Order by id",
+      "unit": "milliseconds (median of 200 requests; 50 for forced misses)",
+      "baseline": {
+        "value": 0.502,
+        "runs": [
+          0.517,
+          0.476,
+          0.502
+        ],
+        "badge": "MEASURED",
+        "method": "Stopwatch, TimingFixture, commit e7b71cc",
+        "environment": "Apple M2 16 GB, macOS 26.6.2, .NET 10.0.5, Release, in-process test host",
+        "date": "2026-11-23",
+        "raw_output_ref": "docs/evidence/timing-before.csv"
+      },
+      "result": {
+        "value": 0.448,
+        "runs": [
+          0.453,
+          0.448,
+          0.445
+        ],
+        "badge": "MEASURED",
+        "method": "Stopwatch, TimingFixture, commit 0008d37",
+        "environment": "Apple M2 16 GB, macOS 26.6.2, .NET 10.0.5, Release, in-process test host",
+        "date": "2026-11-23",
+        "raw_output_ref": "docs/evidence/timing-after.csv"
+      },
+      "note": "About 0.05 ms lower; close to run-to-run variation."
+    }
+  ]
+}
