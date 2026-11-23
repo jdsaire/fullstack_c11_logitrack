@@ -57,3 +57,47 @@ where the course page and a clean build disagreed are logged at the end of each 
   through the context the app already registers. It prints the page's line, then builds an order in memory, adds three
   items, removes one, and prints its summary.
 - The page's "List (list of items in the order)" property is named `Items`.
+
+## Part 2 · REST endpoints
+
+### Entry AI-04 · Part 2
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Generate a GET endpoint to return an order by ID including item details.
+- **Suggested**: `[HttpGet("{id}")]` loading the order with `.Include(o => o.Items)` and `FirstOrDefaultAsync`, returning
+  `NotFound()` when missing and the order entity itself when found.
+- **Verdict**: Changed.
+- **Why**: Kept the eager load and the 404. The route takes an integer id only (`{id:int}`), and the endpoint returns
+  a response object with the items and the order's summary line, rather than the database entity, so the API's
+  shape doesn't change when the table does.
+- **Result**: `OrderController.GetById`, `Dtos/OrderDtos.cs`.
+
+### Entry AI-05 · Part 2
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Suggest how to handle error responses if an ID is not found.
+- **Suggested**: Return `NotFound()` so the framework sends a standard 404 problem body; optionally add a custom message
+  naming the missing id; add an exception-handling middleware for unexpected errors.
+- **Verdict**: Changed.
+- **Why**: Kept `NotFound()` on every route that takes an id. Skipped the custom message: the standard body is enough
+  and stays consistent across routes. The exception handler moved to Part 3, where error bodies are reviewed for
+  internal detail.
+- **Result**: 404 paths in both controllers; `Part2RouteTests`.
+
+### Entry AI-06 · Part 2
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Refactor this controller to use async methods.
+- **Suggested**: `ToListAsync`, `FindAsync`, `FirstOrDefaultAsync` and `SaveChangesAsync` with `Task<ActionResult<T>>`
+  return types; pass a `CancellationToken` into every query.
+- **Verdict**: Unnecessary in part; one suggestion rejected.
+- **Why**: Both controllers were written async from the start, so the refactor changed nothing. The cancellation token
+  was rejected for this build: every query is a short local SQLite call.
+- **Result**: no change.
+
+### Course page vs clean build · Part 2
+- An order is created from items already in stock: the body carries a customer name and the ids of items that aren't
+  on another order. Unknown, repeated or already-ordered ids return 400. This keeps adding inventory a Manager task
+  (Part 3), as ruled for this build. Deleting an order puts its items back in stock.
+- The order list returns each order's item count; the order-by-id route returns the items themselves.
+- The routes are set explicitly (`api/inventory`, `api/orders`) because the order controller's class name is singular.
+- .NET 10's Web API template no longer includes a Swagger page, so Swagger UI comes from the Swashbuckle package, in
+  Development only. The template's own OpenAPI package was removed: it pulled in a library version with a published
+  high-severity advisory.
