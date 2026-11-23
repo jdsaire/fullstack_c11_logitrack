@@ -1,4 +1,6 @@
 using LogiTrack.Data;
+using LogiTrack.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
@@ -8,6 +10,8 @@ var connectionString = builder.Configuration.GetConnectionString("LogiTrack")
     ?? throw new InvalidOperationException("Connection string 'LogiTrack' is missing.");
 
 builder.Services.AddDbContext<LogiTrackContext>(options => options.UseSqlite(connectionString));
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.User.RequireUniqueEmail = true)
+    .AddEntityFrameworkStores<LogiTrackContext>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

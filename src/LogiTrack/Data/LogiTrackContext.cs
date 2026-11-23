@@ -1,10 +1,11 @@
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Data;
 
-/// <summary>EF Core context for LogiTrack's SQLite database.</summary>
-public class LogiTrackContext : DbContext
+/// <summary>EF Core context for LogiTrack's SQLite database, including the Identity tables.</summary>
+public class LogiTrackContext : IdentityDbContext<ApplicationUser>
 {
     public LogiTrackContext(DbContextOptions<LogiTrackContext> options)
         : base(options)

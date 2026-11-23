@@ -15,6 +15,10 @@ public class Order
 
     public DateTime DatePlaced { get; set; }
 
+    /// <summary>Id of the signed-in user who created the order.</summary>
+    [MaxLength(450)]
+    public string? CreatedByUserId { get; set; }
+
     /// <summary>The items in the order.</summary>
     public List<InventoryItem> Items { get; set; } = new();
 
