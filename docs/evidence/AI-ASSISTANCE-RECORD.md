@@ -101,3 +101,49 @@ where the course page and a clean build disagreed are logged at the end of each 
 - .NET 10's Web API template no longer includes a Swagger page, so Swagger UI comes from the Swashbuckle package, in
   Development only. The template's own OpenAPI package was removed: it pulled in a library version with a published
   high-severity advisory.
+
+## Part 3 · Identity, tokens and roles
+
+### Entry AI-07 · Part 3
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Add JWT authentication to an ASP.NET Core API.
+- **Suggested**: `AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(...)` with issuer, audience,
+  lifetime and signing-key validation; the signing key under `Jwt:Key` in `appsettings.json`; a token built from the
+  user's id, email and roles; `UseAuthentication()` before `UseAuthorization()`.
+- **Verdict**: Changed.
+- **Why**: Kept the four validations and the claims. Moved the key out of `appsettings.json` into .NET user-secrets,
+  with a startup check that stops the API if the key is missing or shorter than 32 bytes. The suggestion also missed
+  an interaction: `AddIdentity` makes cookies the default scheme, so a call without a token got a redirect instead of
+  a 401. Tokens are now the default for sign-in checks, challenges and refusals, and a test asserts 401 with no
+  redirect on every route.
+- **Result**: `Program.cs`, `Services/TokenService.cs`, `Services/JwtSettings.cs`; `Part3AuthTests`.
+
+### Entry AI-08 · Part 3
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: How do I restrict a route to users with a specific role?
+- **Suggested**: `[Authorize(Roles = "Manager")]` on the route, the role created with `RoleManager`, and a `role` field on
+  the registration request so an admin account can be created through the API.
+- **Verdict**: Changed.
+- **Why**: Kept the attribute on adding inventory and on both deletes, and the role creation. Rejected the role field:
+  anyone could register as a Manager. A startup seeder gives the role only to the account whose email is set in
+  user-secrets, once that account registers. A test posts a role at registration and confirms it's ignored.
+- **Result**: `Data/ManagerSeeder.cs`, both controllers; `Register_IgnoresAPostedRole`.
+
+### Entry AI-09 · Part 3
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Suggest improvements to secure user registration.
+- **Suggested**: Unique emails; strong password rules; lockout after repeated failed sign-ins; the same message for a
+  wrong password and an unknown email; email confirmation; rate limiting on sign-in; HTTPS only.
+- **Verdict**: Kept in part.
+- **Why**: Kept unique emails, Identity's default password rules, lockout on failed sign-ins and generic messages (a
+  taken email also gets a generic message, so registration doesn't reveal who has an account). Field rules on every
+  request body were added at the same time, with 400s that carry no internal detail. Rejected email confirmation and
+  rate limiting for this build: there is no mail service, and both sit outside the capstone's parts. HTTPS belongs to
+  a deployment, which is out of scope; local runs use http on localhost.
+- **Result**: `Controllers/AuthController.cs`, request models in `Dtos/`; `Part3ValidationTests`.
+
+### Course page vs clean build · Part 3
+- The page installs the SQLite package again; it was already in place from Part 1.
+- The page names no JWT package; tokens use Microsoft.AspNetCore.Authentication.JwtBearer.
+- Registration returns 201 without a token; login issues the token.
+- Each order records the id of the signed-in user who created it (Part 5's guidance), from the token.
