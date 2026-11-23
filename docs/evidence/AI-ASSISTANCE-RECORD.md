@@ -147,3 +147,66 @@ where the course page and a clean build disagreed are logged at the end of each 
 - The page names no JWT package; tokens use Microsoft.AspNetCore.Authentication.JwtBearer.
 - Registration returns 201 without a token; login issues the token.
 - Each order records the id of the signed-in user who created it (Part 5's guidance), from the token.
+
+## Part 4 · Caching and query performance
+
+### Entry AI-10 · Part 4
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Add in-memory caching to a GET request in ASP.NET Core.
+- **Suggested**: `AddMemoryCache()`, `IMemoryCache` injected into the controller, `TryGetValue` then `Set` with a
+  30-second absolute expiration around the inventory query, caching the entity list.
+- **Verdict**: Changed.
+- **Why**: Kept the 30-second absolute expiration. Used `GetOrCreateAsync` for one read path, and cached the response
+  list rather than database entities. The suggestion never cleared the cache, so a new item would stay invisible for
+  up to 30 seconds. Every write that changes the list now clears it: adding or deleting an item, and creating or
+  deleting an order (both change an item's order id). Tests cover each write and the expiry.
+- **Result**: `InventoryController.GetAll`, `Services/InventoryCache.cs`; `Part4CacheTests`.
+
+### Entry AI-11 · Part 4
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Optimize Entity Framework queries in ASP.NET Core.
+- **Suggested**: `.AsNoTracking()` on read-only queries; `.Select()` projections instead of loading whole entities;
+  `.Include()` where related data is needed, to avoid one query per order; an index on the foreign key; compiled
+  queries; pagination on list routes.
+- **Verdict**: Kept in part.
+- **Why**: Kept no-tracking reads everywhere, a projection for the inventory list, and a projection for the order list
+  that counts items in SQL instead of loading every item. Order by id keeps `.Include()` because it returns the items.
+  The foreign-key index already existed from the first migration. Rejected compiled queries (no measurable need at
+  this size) and pagination (no course part asks for it; named as a limitation).
+- **Result**: both controllers' read routes.
+
+### Entry AI-12 · Part 4
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Suggest performance improvements in this controller.
+- **Suggested**: For the inventory controller: sort in the database rather than in memory; add `[ResponseCache]` so
+  browsers and proxies keep the list.
+- **Verdict**: Kept in part.
+- **Why**: Sorting already ran in SQL. Rejected HTTP response caching: every route needs a token, and a client-side copy
+  would keep showing stale stock after a write, which the server cache avoids by clearing itself.
+- **Result**: no change beyond AI-10 and AI-11.
+
+### Entry AI-13 · Part 4
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: How can I avoid repeated DB calls for the same result?
+- **Suggested**: Cache the result in memory; keep the cache key in one place so every controller clears the same entry;
+  load several rows with one query instead of one lookup per id.
+- **Verdict**: Kept.
+- **Why**: The key and lifetime live in one class used by both controllers. Order creation already loads all requested
+  items in one query.
+- **Result**: `Services/InventoryCache.cs`, `OrderController.Create`.
+
+### Entry AI-14 · Part 4
+- **Date**: 2026-11-22
+- **Prompt (verbatim)**: Improve the speed of this API endpoint.
+- **Suggested**: For order by id: read without tracking, and split the order and its items into two queries
+  (`AsSplitQuery`).
+- **Verdict**: Changed.
+- **Why**: Kept no-tracking. Rejected the split query: one order with a few items is cheaper as one joined query. The
+  timing shows no change for this route (0.490 ms before, 0.498 ms after, medians of 200 requests), so it's reported
+  as unchanged.
+- **Result**: `OrderController.GetById`; `docs/evidence/PERFORMANCE-REPORT.md` (Part 5).
+
+### Course page vs clean build · Part 4
+- Timings are taken with a Stopwatch around in-process requests (no network) by an opt-in timing test, so the same
+  measurement runs before and after the changes. The inventory GET also logs, with a Stopwatch, whether each response
+  came from memory or the database.
