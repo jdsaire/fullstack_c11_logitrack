@@ -1,9 +1,12 @@
+using System.Diagnostics;
 using LogiTrack.Data;
 using LogiTrack.Dtos;
 using LogiTrack.Models;
+using LogiTrack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LogiTrack.Controllers;
 
@@ -13,18 +16,36 @@ namespace LogiTrack.Controllers;
 public class InventoryController : ControllerBase
 {
     private readonly LogiTrackContext _context;
+    private readonly IMemoryCache _cache;
+    private readonly ILogger<InventoryController> _logger;
 
-    public InventoryController(LogiTrackContext context)
+    public InventoryController(LogiTrackContext context, IMemoryCache cache, ILogger<InventoryController> logger)
     {
         _context = context;
+        _cache = cache;
+        _logger = logger;
     }
 
-    /// <summary>Returns every inventory item.</summary>
+    /// <summary>Returns every inventory item, from memory for 30 seconds after the first read.</summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<InventoryItemResponse>>> GetAll()
     {
-        var items = await _context.InventoryItems.OrderBy(i => i.ItemId).ToListAsync();
-        return Ok(items.Select(InventoryItemResponse.From));
+        var watch = Stopwatch.StartNew();
+        var fromDatabase = false;
+
+        var items = await _cache.GetOrCreateAsync(InventoryCache.Key, async entry =>
+        {
+            fromDatabase = true;
+            entry.AbsoluteExpirationRelativeToNow = InventoryCache.Lifetime;
+            var rows = await _context.InventoryItems.OrderBy(i => i.ItemId).ToListAsync();
+            return rows.Select(InventoryItemResponse.From).ToList();
+        });
+
+        watch.Stop();
+        _logger.LogInformation("GET /api/inventory served from {Source} in {ElapsedMs:F2} ms",
+            fromDatabase ? "database" : "cache", watch.Elapsed.TotalMilliseconds);
+
+        return Ok(items);
     }
 
     /// <summary>Adds an item to the inventory. Manager only.</summary>
@@ -43,6 +64,7 @@ public class InventoryController : ControllerBase
 
         _context.InventoryItems.Add(item);
         await _context.SaveChangesAsync();
+        _cache.Remove(InventoryCache.Key);
 
         return CreatedAtAction(nameof(GetAll), null, InventoryItemResponse.From(item));
     }
@@ -62,6 +84,7 @@ public class InventoryController : ControllerBase
 
         _context.InventoryItems.Remove(item);
         await _context.SaveChangesAsync();
+        _cache.Remove(InventoryCache.Key);
         return NoContent();
     }
 }

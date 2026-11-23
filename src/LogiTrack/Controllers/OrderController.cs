@@ -1,9 +1,11 @@
 using LogiTrack.Data;
 using LogiTrack.Dtos;
 using LogiTrack.Models;
+using LogiTrack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace LogiTrack.Controllers;
 
@@ -13,10 +15,12 @@ namespace LogiTrack.Controllers;
 public class OrderController : ControllerBase
 {
     private readonly LogiTrackContext _context;
+    private readonly IMemoryCache _cache;
 
-    public OrderController(LogiTrackContext context)
+    public OrderController(LogiTrackContext context, IMemoryCache cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     /// <summary>Returns every order with its item count.</summary>
@@ -79,6 +83,7 @@ public class OrderController : ControllerBase
 
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
+        _cache.Remove(InventoryCache.Key); // the items' order id changed
 
         return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, OrderResponse.From(order));
     }
@@ -98,6 +103,7 @@ public class OrderController : ControllerBase
 
         _context.Orders.Remove(order);
         await _context.SaveChangesAsync();
+        _cache.Remove(InventoryCache.Key); // the items went back to stock
         return NoContent();
     }
 }

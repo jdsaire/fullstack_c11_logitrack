@@ -24,6 +24,7 @@ if (Encoding.UTF8.GetByteCount(jwt.Key) < 32)
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.Section));
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<ManagerSeeder>();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddDbContext<LogiTrackContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.User.RequireUniqueEmail = true)
