@@ -15,7 +15,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
 {
     using var scope = app.Services.CreateScope();
-    scope.ServiceProvider.GetRequiredService<LogiTrackContext>().Database.Migrate();
+    var context = scope.ServiceProvider.GetRequiredService<LogiTrackContext>();
+    context.Database.Migrate();
+
+    if (app.Environment.IsDevelopment())
+    {
+        DevSeeder.Seed(context);
+    }
 }
 
 app.UseAuthorization();
