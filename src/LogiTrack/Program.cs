@@ -56,7 +56,10 @@ builder.Services.AddAuthentication(options =>
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
+// Malformed JSON gets a generic message, never the parser's own text.
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.AllowInputFormatterExceptionMessages = false);
+builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -90,11 +93,15 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
     }
 }
 
-// Swagger UI for local review only.
+// Swagger UI for local review only. Outside Development, an unexpected error returns a bare 500.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    app.UseExceptionHandler();
 }
 
 app.UseAuthentication();

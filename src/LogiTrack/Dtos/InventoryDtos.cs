@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using LogiTrack.Models;
 
 namespace LogiTrack.Dtos;
@@ -5,10 +6,15 @@ namespace LogiTrack.Dtos;
 /// <summary>Body of POST /api/inventory.</summary>
 public class CreateInventoryItemRequest
 {
+    [Required]
+    [StringLength(100)]
     public string Name { get; set; } = string.Empty;
 
+    [Range(0, 1_000_000)]
     public int Quantity { get; set; }
 
+    [Required]
+    [StringLength(100)]
     public string Location { get; set; } = string.Empty;
 }
 

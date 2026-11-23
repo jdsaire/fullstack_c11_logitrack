@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using LogiTrack.Models;
 
 namespace LogiTrack.Dtos;
@@ -5,8 +6,13 @@ namespace LogiTrack.Dtos;
 /// <summary>Body of POST /api/orders: a customer and the ids of items in stock that aren't on another order.</summary>
 public class CreateOrderRequest
 {
+    [Required]
+    [StringLength(100)]
     public string CustomerName { get; set; } = string.Empty;
 
+    [Required]
+    [MinLength(1, ErrorMessage = "An order needs at least one item.")]
+    [MaxLength(50, ErrorMessage = "An order can hold at most 50 items.")]
     public List<int> ItemIds { get; set; } = new();
 }
 

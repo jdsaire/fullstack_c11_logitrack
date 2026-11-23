@@ -44,12 +44,6 @@ public class OrderController : ControllerBase
     public async Task<ActionResult<OrderResponse>> Create(CreateOrderRequest request)
     {
         var ids = request.ItemIds;
-        if (ids.Count == 0)
-        {
-            ModelState.AddModelError(nameof(request.ItemIds), "An order needs at least one item.");
-            return ValidationProblem();
-        }
-
         if (ids.Distinct().Count() != ids.Count)
         {
             ModelState.AddModelError(nameof(request.ItemIds), "Each item can appear once.");
