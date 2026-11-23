@@ -11,6 +11,7 @@ namespace LogiTrack.Controllers;
 
 [ApiController]
 [Authorize]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [Route("api/orders")]
 public class OrderController : ControllerBase
 {
@@ -99,6 +100,7 @@ public class OrderController : ControllerBase
     /// <summary>Deletes an order by id. Its items go back to stock. Manager only.</summary>
     [HttpDelete("{id:int}")]
     [Authorize(Roles = ManagerSeeder.ManagerRole)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)

@@ -12,6 +12,7 @@ namespace LogiTrack.Controllers;
 
 [ApiController]
 [Authorize]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [Route("api/inventory")]
 public class InventoryController : ControllerBase
 {
@@ -54,6 +55,7 @@ public class InventoryController : ControllerBase
     /// <summary>Adds an item to the inventory. Manager only.</summary>
     [HttpPost]
     [Authorize(Roles = ManagerSeeder.ManagerRole)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<InventoryItemResponse>> Create(CreateInventoryItemRequest request)
@@ -75,6 +77,7 @@ public class InventoryController : ControllerBase
     /// <summary>Removes an item by id. Manager only.</summary>
     [HttpDelete("{id:int}")]
     [Authorize(Roles = ManagerSeeder.ManagerRole)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
