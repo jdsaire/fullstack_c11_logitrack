@@ -1,12 +1,14 @@
 using LogiTrack.Data;
 using LogiTrack.Dtos;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/inventory")]
 public class InventoryController : ControllerBase
 {
@@ -25,8 +27,9 @@ public class InventoryController : ControllerBase
         return Ok(items.Select(InventoryItemResponse.From));
     }
 
-    /// <summary>Adds an item to the inventory.</summary>
+    /// <summary>Adds an item to the inventory. Manager only.</summary>
     [HttpPost]
+    [Authorize(Roles = ManagerSeeder.ManagerRole)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<InventoryItemResponse>> Create(CreateInventoryItemRequest request)
@@ -44,8 +47,9 @@ public class InventoryController : ControllerBase
         return CreatedAtAction(nameof(GetAll), null, InventoryItemResponse.From(item));
     }
 
-    /// <summary>Removes an item by id.</summary>
+    /// <summary>Removes an item by id. Manager only.</summary>
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = ManagerSeeder.ManagerRole)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)

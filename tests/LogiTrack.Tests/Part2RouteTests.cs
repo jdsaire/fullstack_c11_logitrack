@@ -12,10 +12,11 @@ public class Part2RouteTests
     private HttpClient _client = null!;
 
     [SetUp]
-    public void StartApi()
+    public async Task StartApi()
     {
         _factory = new LogiTrackFactory();
-        _client = _factory.CreateClient();
+        // Part 2 checks the routes themselves, so it calls them as the Manager, who may use every route.
+        _client = await AuthHelper.SignedInClientAsync(_factory, asManager: true);
     }
 
     [TearDown]

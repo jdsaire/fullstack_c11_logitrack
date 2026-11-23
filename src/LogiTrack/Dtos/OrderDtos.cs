@@ -19,9 +19,10 @@ public record OrderResponse(
     string CustomerName,
     DateTime DatePlaced,
     string Summary,
+    string? CreatedByUserId,
     IReadOnlyList<InventoryItemResponse> Items)
 {
     public static OrderResponse From(Order order) =>
-        new(order.OrderId, order.CustomerName, order.DatePlaced, order.GetOrderSummary(),
+        new(order.OrderId, order.CustomerName, order.DatePlaced, order.GetOrderSummary(), order.CreatedByUserId,
             order.Items.Select(InventoryItemResponse.From).ToList());
 }

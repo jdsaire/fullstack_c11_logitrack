@@ -1,12 +1,14 @@
 using LogiTrack.Data;
 using LogiTrack.Dtos;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/orders")]
 public class OrderController : ControllerBase
 {
@@ -70,7 +72,12 @@ public class OrderController : ControllerBase
             return ValidationProblem();
         }
 
-        var order = new Order { CustomerName = request.CustomerName, DatePlaced = DateTime.UtcNow };
+        var order = new Order
+        {
+            CustomerName = request.CustomerName,
+            DatePlaced = DateTime.UtcNow,
+            CreatedByUserId = User.FindFirst("sub")?.Value
+        };
         foreach (var item in items)
         {
             order.AddItem(item);
@@ -82,8 +89,9 @@ public class OrderController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, OrderResponse.From(order));
     }
 
-    /// <summary>Deletes an order by id. Its items go back to stock.</summary>
+    /// <summary>Deletes an order by id. Its items go back to stock. Manager only.</summary>
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = ManagerSeeder.ManagerRole)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)

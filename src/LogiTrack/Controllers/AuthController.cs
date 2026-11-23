@@ -1,3 +1,4 @@
+using LogiTrack.Data;
 using LogiTrack.Dtos;
 using LogiTrack.Models;
 using LogiTrack.Services;
@@ -16,18 +17,21 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly TokenService _tokens;
+    private readonly ManagerSeeder _managerSeeder;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        TokenService tokens)
+        TokenService tokens,
+        ManagerSeeder managerSeeder)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _tokens = tokens;
+        _managerSeeder = managerSeeder;
     }
 
-    /// <summary>Creates an account. New accounts get no role.</summary>
+    /// <summary>Creates an account. Only the account configured as Manager in user-secrets gets a role.</summary>
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,6 +54,7 @@ public class AuthController : ControllerBase
             return ValidationProblem();
         }
 
+        await _managerSeeder.PromoteIfConfiguredAsync(user);
         return StatusCode(StatusCodes.Status201Created, new { email = user.Email });
     }
 
