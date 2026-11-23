@@ -27,8 +27,13 @@ public class OrderController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<OrderSummaryResponse>>> GetAll()
     {
-        var orders = await _context.Orders.Include(o => o.Items).OrderBy(o => o.OrderId).ToListAsync();
-        return Ok(orders.Select(o => new OrderSummaryResponse(o.OrderId, o.CustomerName, o.DatePlaced, o.Items.Count)));
+        // The count is computed in SQL; the items themselves are never loaded for the list.
+        var orders = await _context.Orders
+            .AsNoTracking()
+            .OrderBy(o => o.OrderId)
+            .Select(o => new OrderSummaryResponse(o.OrderId, o.CustomerName, o.DatePlaced, o.Items.Count))
+            .ToListAsync();
+        return Ok(orders);
     }
 
     /// <summary>Returns one order with its items.</summary>
@@ -37,7 +42,10 @@ public class OrderController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<OrderResponse>> GetById(int id)
     {
-        var order = await _context.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.OrderId == id);
+        var order = await _context.Orders
+            .AsNoTracking()
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.OrderId == id);
         return order is null ? NotFound() : Ok(OrderResponse.From(order));
     }
 

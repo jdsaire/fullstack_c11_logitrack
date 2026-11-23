@@ -37,8 +37,11 @@ public class InventoryController : ControllerBase
         {
             fromDatabase = true;
             entry.AbsoluteExpirationRelativeToNow = InventoryCache.Lifetime;
-            var rows = await _context.InventoryItems.OrderBy(i => i.ItemId).ToListAsync();
-            return rows.Select(InventoryItemResponse.From).ToList();
+            return await _context.InventoryItems
+                .AsNoTracking()
+                .OrderBy(i => i.ItemId)
+                .Select(i => new InventoryItemResponse(i.ItemId, i.Name, i.Quantity, i.Location, i.OrderId))
+                .ToListAsync();
         });
 
         watch.Stop();
