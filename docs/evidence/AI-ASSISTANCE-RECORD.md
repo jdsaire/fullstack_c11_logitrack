@@ -2,8 +2,15 @@
 
 **System**: LogiTrack order management API
 **Author**: Juan Diego S. (`jdsaire`)
-**Scope**: Microsoft Full-Stack Developer certificate, Course 11 capstone, Parts 1–5
+**Scope**: Microsoft Full-Stack Developer certificate, Course 11 capstone, Parts 1 to 5
 **Feeds**: Submission entry 3 (challenges, and how the AI assistant helped)
+
+## Summary
+
+17 course prompts, one entry each: 9 changed, 5 kept in part, 1 kept as suggested, 1 rejected, and 1 unnecessary
+(the code already did what it asked). The rejected or corrected suggestions that mattered most: a role field on
+registration that would let anyone become Manager (AI-08), the signing key kept in `appsettings.json` (AI-07), and a
+cache that never cleared after a write (AI-10).
 
 ## How this record works
 

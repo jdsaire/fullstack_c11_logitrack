@@ -10,7 +10,7 @@ this file is estimated, so it has no **[SIM]** rows.
 | Method | Stopwatch around each request, in process (test host, no network), signed in as a plain user |
 | Dataset | 2,000 inventory items; 200 orders × 5 items, in a SQLite file |
 | Requests | 20 warm-up, then 200 timed per route (50 for forced cache misses); 3 runs each |
-| Before | commit `e7b71cc` (Parts 1–3, no cache, tracked queries) |
+| Before | commit `e7b71cc` (Parts 1 to 3, no cache, tracked queries) |
 | After | commit `0008d37` (30 s inventory cache, untracked and projected reads) |
 | Date | 23 Nov 2026 |
 | Raw rows | `timing-before.csv`, `timing-after.csv` |
