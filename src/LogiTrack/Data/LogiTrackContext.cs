@@ -25,5 +25,10 @@ public class LogiTrackContext : DbContext
             .WithOne()
             .HasForeignKey(i => i.OrderId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Dates are written in UTC; SQLite drops the kind, so it's restored on read.
+        modelBuilder.Entity<Order>()
+            .Property(o => o.DatePlaced)
+            .HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
     }
 }

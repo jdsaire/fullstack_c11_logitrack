@@ -148,4 +148,14 @@ public class Part2RouteTests
         Assert.That(list!.Single().OrderId, Is.Null);
         Assert.That((await PostOrderAsync(a.ItemId)).StatusCode, Is.EqualTo(HttpStatusCode.Created));
     }
+
+    [Test]
+    public async Task Order_DateIsReturnedAsUtc()
+    {
+        var a = await AddItemAsync("Pallet Jack");
+        var order = (await (await PostOrderAsync(a.ItemId)).Content.ReadFromJsonAsync<OrderResponse>())!;
+
+        var raw = await _client.GetStringAsync($"/api/orders/{order.OrderId}");
+        Assert.That(raw, Does.Match("\"datePlaced\":\"[0-9T:.-]+Z\""));
+    }
 }
