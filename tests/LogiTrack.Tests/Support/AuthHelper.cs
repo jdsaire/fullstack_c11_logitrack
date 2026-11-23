@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using LogiTrack.Dtos;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace LogiTrack.Tests.Support;
 
@@ -30,7 +31,7 @@ public static class AuthHelper
     }
 
     /// <summary>A client carrying a token for a new account (the Manager account when asked).</summary>
-    public static async Task<HttpClient> SignedInClientAsync(LogiTrackFactory factory, bool asManager = false)
+    public static async Task<HttpClient> SignedInClientAsync(WebApplicationFactory<Program> factory, bool asManager = false)
     {
         var client = factory.CreateClient();
         var email = asManager ? LogiTrackFactory.ManagerEmail : NewEmail();
