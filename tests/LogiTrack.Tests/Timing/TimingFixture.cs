@@ -41,8 +41,9 @@ public class TimingFixture
             {
                 rows.Add(await MeasureAsync(client, route, "repeat", Timed, beforeEach: null));
 
+                // Only the inventory list is cached, so only it has a miss to force.
                 var cache = factory.Services.GetService<IMemoryCache>() as MemoryCache;
-                if (cache is not null)
+                if (cache is not null && route == "/api/inventory")
                 {
                     rows.Add(await MeasureAsync(client, route, "forced-miss", ForcedMisses, () => cache.Compact(1.0)));
                 }
