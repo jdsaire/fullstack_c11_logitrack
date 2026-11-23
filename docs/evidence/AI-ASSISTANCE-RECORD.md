@@ -201,9 +201,9 @@ where the course page and a clean build disagreed are logged at the end of each 
 - **Suggested**: For order by id: read without tracking, and split the order and its items into two queries
   (`AsSplitQuery`).
 - **Verdict**: Changed.
-- **Why**: Kept no-tracking. Rejected the split query: one order with a few items is cheaper as one joined query. The
-  timing shows no change for this route (0.490 ms before, 0.498 ms after, medians of 200 requests), so it's reported
-  as unchanged.
+- **Why**: Kept no-tracking. Rejected the split query: one order with a few items is cheaper as one joined query. A
+  first single run showed no change (0.490 ms before, 0.498 ms after); the three-run sweep in Part 5 shows 0.502 ms
+  before and 0.448 ms after, a difference close to run-to-run variation.
 - **Result**: `OrderController.GetById`; `docs/evidence/PERFORMANCE-REPORT.md` (Part 5).
 
 ### Course page vs clean build · Part 4
